@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Advisor Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-1/5 bg-indigo-900 text-white flex flex-col h-full">
+            <div class="py-4 px-6 text-2xl font-bold">BALANZ</div>
+            <nav class="flex-1">
+                <ul>
+                    <li class="py-2 px-6 hover:bg-indigo-700">Dashboard</li>
+                    <li class="py-2 px-6 hover:bg-indigo-700">Bandeja de Entrada</li>
+                    <li class="py-2 px-6 hover:bg-indigo-700">Rendimiento</li>
+                    <li class="py-2 px-6 hover:bg-indigo-700">Oportunidades</li>
+                </ul>
+            </nav>
+            <div class="p-4 bg-indigo-800">
+                <a href="#" class="block text-center text-white py-2 px-4 rounded-lg hover:bg-indigo-700">Configuración</a>
+            </div>
+        </aside>        
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Plataforma Beta</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+        </head>
+        <body class="bg-gray-100 h-screen">
+            <div id="popup-modal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 hidden">
+                <div class="bg-white rounded-lg shadow-lg w-96 p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Accede a la Beta</h2>
+                    <p class="text-gray-600 mb-6">Deja tu correo electrónico para obtener acceso exclusivo a la versión beta de nuestra plataforma.</p>
+                    <form id="email-form">
+                        <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+                        <input type="email" id="email" name="email" required
+                        class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-2 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="ejemplo@correo.com">
+                        <button type="submit"
+                                class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 w-full">Enviar</button>
+                    </form>
+                    <button id="close-modal"
+                            class="mt-4 text-gray-600 hover:text-gray-800 w-full text-center underline">
+                        No gracias
+                    </button>
+                </div>
+            </div>
+        
+            <div class="flex justify-center items-center h-full">
+            </div>
+        
+            <script>
+                // Mostrar el pop-up al cargar la página
+                window.onload = () => {
+                    const popup = document.getElementById('popup-modal');
+                    popup.classList.remove('hidden');
+                };
+        
+                // Manejar el cierre del pop-up
+                document.getElementById('close-modal').onclick = () => {
+                    const popup = document.getElementById('popup-modal');
+                    popup.classList.add('hidden');
+                };
+        
+                // Manejar el envío del formulario
+                document.getElementById('email-form').onsubmit = (event) => {
+                    event.preventDefault();
+                    const email = document.getElementById('email').value;
+                    alert(`Gracias por registrarte con el correo: ${email}`);
+                    document.getElementById('popup-modal').classList.add('hidden');
+                };
+            </script>
+        </body>
+        </html>
+        
+                <!-- Main Content -->
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <div class="bg-gray-100 p-4 rounded-lg shadow-md">
+                    <h3 class="font-semibold text-lg mb-4">Evolución Anual de los Fondos</h3>
+                    <canvas id="fundsChart" class="rounded-lg"></canvas>                        <p class="text-sm text-gray-600 mt-4">Crecimiento total: <strong>$2,000,000</strong> administrados.</p>
+                    </div>
+                    
+                    <script>
+                    // Datos para el gráfico
+                    const ctx = document.getElementById('fundsChart').getContext('2d');
+                    const fundsChart = new Chart(ctx, {
+                        type: 'line', // Tipo de gráfico
+                        data: {                                labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'], // Meses del año
+                            datasets: [
+                                {
+                                    label: 'Fondos Administrados ($)',
+                                    data: [500000, 550000, 610000, 680000, 750000, 820000, 920000, 1020000, 1150000, 1300000, 1700000, 2000000],
+                                    borderColor: 'rgba(75, 192, 192, 1)', // Color de la línea
+                                    backgroundColor: 'rgba(75, 192, 192, 0.2)', // Relleno bajo la línea
+                                    borderWidth: 2,
+                                    fill: true,
+                                    },
+                            ],
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                position: 'top',
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            return `$${context.raw.toLocaleString()}`;
+                                        },
+                                    },
+                                },
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Meses del Año',
+                                    },
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Fondos Administrados ($)',
+                                    },
+                                    ticks: {
+                                        callback: function (value) {
+                                            return `$${value.toLocaleString()}`;
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    });
+                </script>
+                    <!-- Estadísticas detalladas -->
+                    <div class="bg-gray-100 p-4 rounded-lg shadow-md">
+                        <h3 class="font-semibold text-lg mb-4">Estadísticas Clave</h3>
+                        <ul class="space-y-2">
+                            <li><strong>Total Administrado:</strong> $2,000,000</li>
+                            <li><strong>Interés Generado:</strong> 5.5%</li>
+                            <li><strong>Total de Operaciones:</strong> 120</li>
+                            <li><strong>Comisiones Obtenidas:</strong> $60,000 (1% por operación)</li>
+                        </ul>
+                    </div>
+                </div>
+            
+                <!-- Tabla de desglose por perfil -->
+                <div class="mt-6">
+                    <h3 class="font-semibold text-lg mb-4">Desglose por Perfil de Fondo</h3>
+                    <table class="w-full border-collapse border border-gray-200">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-200 p-2">Perfil</th>
+                                <th class="border border-gray-200 p-2">Fondos Administrados ($)</th>
+                                <th class="border border-gray-200 p-2">Rendimiento Anual (%)</th>
+                                <th class="border border-gray-200 p-2">Crecimiento ($)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border border-gray-200 p-2">Conservador</td>
+                                <td class="border border-gray-200 p-2">$500,000</td>
+                                <td class="border border-gray-200 p-2">3.5%</td>
+                                <td class="border border-gray-200 p-2">$17,500</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">Moderado</td>
+                                <td class="border border-gray-200 p-2">$1,200,000</td>
+                                <td class="border border-gray-200 p-2">7.2%</td>
+                                <td class="border border-gray-200 p-2">$86,400</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">Agresivo</td>
+                                <td class="border border-gray-200 p-2">$300,000</td>
+                                <td class="border border-gray-200 p-2">12.8%</td>
+                                <td class="border border-gray-200 p-2">$38,400</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>            
+
+                <div class="col-span-3 bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-bold mb-4">Acciones en Seguimiento</h2>
+                    <table class="w-full border-collapse border border-gray-200">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-200 p-2">Ticker</th>
+                                <th class="border border-gray-200 p-2">Nombre</th>
+                                <th class="border border-gray-200 p-2">Precio ($)</th>
+                                <th class="border border-gray-200 p-2">Variación (%)</th>
+                                <th class="border border-gray-200 p-2">Volumen</th>
+                                <th class="border border-gray-200 p-2">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border border-gray-200 p-2">ALUA</td>
+                                <td class="border border-gray-200 p-2">Aluar Aluminio</td>
+                                <td class="border border-gray-200 p-2">$908.00</td>
+                                <td class="border border-gray-200 p-2 text-green-600">+0.33%</td>
+                                <td class="border border-gray-200 p-2">955,544</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Comprar</button>
+                                    <button class="text-red-600">Vender</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">BMA</td>
+                                <td class="border border-gray-200 p-2">Banco Macro</td>
+                                <td class="border border-gray-200 p-2">$9,220.00</td>
+                                <td class="border border-gray-200 p-2 text-green-600">+0.33%</td>
+                                <td class="border border-gray-200 p-2">3,275,453</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Comprar</button>
+                                    <button class="text-red-600">Vender</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">BBAR</td>
+                                <td class="border border-gray-200 p-2">Banco Francés</td>
+                                <td class="border border-gray-200 p-2">$6,210.00</td>
+                                <td class="border border-gray-200 p-2 text-green-600">+1.97%</td>
+                                <td class="border border-gray-200 p-2">1,073,964</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Comprar</button>
+                                    <button class="text-red-600">Vender</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">YPFD</td>
+                                <td class="border border-gray-200 p-2">YPF Sociedad Anónima</td>
+                                <td class="border border-gray-200 p-2">$1,200.50</td>
+                                <td class="border border-gray-200 p-2 text-red-600">-0.75%</td>
+                                <td class="border border-gray-200 p-2">1,564,231</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Comprar</button>
+                                    <button class="text-red-600">Vender</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">CEPU</td>
+                                <td class="border border-gray-200 p-2">Central Puerto</td>
+                                <td class="border border-gray-200 p-2">$1,550.00</td>
+                                <td class="border border-gray-200 p-2 text-green-600">+1.64%</td>
+                                <td class="border border-gray-200 p-2">1,481,378</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Comprar</button>
+                                    <button class="text-red-600">Vender</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">COME</td>
+                                <td class="border border-gray-200 p-2">Comercial del Plata</td>
+                                <td class="border border-gray-200 p-2">$229.00</td>
+                                <td class="border border-gray-200 p-2 text-green-600">+1.22%</td>
+                                <td class="border border-gray-200 p-2">943,336</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Comprar</button>
+                                    <button class="text-red-600">Vender</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">CRES</td>
+                                <td class="border border-gray-200 p-2">Cresud S.A.</td>
+                                <td class="border border-gray-200 p-2">$1,490.00</td>
+                                <td class="border border-gray-200 p-2 text-green-600">+2.05%</td>
+                                <td class="border border-gray-200 p-2">1,268,712</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Comprar</button>
+                                    <button class="text-red-600">Vender</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">EDN</td>
+                                <td class="border border-gray-200 p-2">Edenor</td>
+                                <td class="border border-gray-200 p-2">$2,425.00</td>
+                                <td class="border border-gray-200 p-2 text-red-600">-2.61%</td>
+                                <td class="border border-gray-200 p-2">1,673,521</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Comprar</button>
+                                    <button class="text-red-600">Vender</button>
+                                </td>
+                            </tr>
+                            <!-- Add more rows -->
+                        </tbody>
+                    </table>
+                </div>
+                
+
+                <div class="col-span-3 bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-bold mb-4">Cartera de Clientes</h2>
+                    <table class="w-full border-collapse border border-gray-200">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-200 p-2">Nombre</th>
+                                <th class="border border-gray-200 p-2">Saldo Total ($)</th>
+                                <th class="border border-gray-200 p-2">Saldo Disponible ($)</th>
+                                <th class="border border-gray-200 p-2">% Variación (Día/Mes/Año)</th>
+                                <th class="border border-gray-200 p-2">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border border-gray-200 p-2">Carlos Pérez</td>
+                                <td class="border border-gray-200 p-2">$10,000</td>
+                                <td class="border border-gray-200 p-2">$2,000</td>
+                                <td class="border border-gray-200 p-2">+0.5% / +3% / +8%</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Ver Oportunidades</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">María López</td>
+                                <td class="border border-gray-200 p-2">$15,000</td>
+                                <td class="border border-gray-200 p-2">$5,000</td>
+                                <td class="border border-gray-200 p-2">+1.2% / +4% / +10%</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Ver Oportunidades</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">Juan García</td>
+                                <td class="border border-gray-200 p-2">$8,000</td>
+                                <td class="border border-gray-200 p-2">$3,000</td>
+                                <td class="border border-gray-200 p-2">+0.8% / +2.5% / +7%</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Ver Oportunidades</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">Laura Gómez</td>
+                                <td class="border border-gray-200 p-2">$12,000</td>
+                                <td class="border border-gray-200 p-2">$4,000</td>
+                                <td class="border border-gray-200 p-2">+1.0% / +3.5% / +9%</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Ver Oportunidades</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">Fernando Ruiz</td>
+                                <td class="border border-gray-200 p-2">$20,000</td>
+                                <td class="border border-gray-200 p-2">$7,000</td>
+                                <td class="border border-gray-200 p-2">+0.7% / +2% / +6%</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Ver Oportunidades</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">Ana Castillo</td>
+                                <td class="border border-gray-200 p-2">$18,000</td>
+                                <td class="border border-gray-200 p-2">$6,500</td>
+                                <td class="border border-gray-200 p-2">+1.1% / +4.5% / +12%</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Ver Oportunidades</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">Luis Ortega</td>
+                                <td class="border border-gray-200 p-2">$25,000</td>
+                                <td class="border border-gray-200 p-2">$10,000</td>
+                                <td class="border border-gray-200 p-2">+1.3% / +5% / +15%</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Ver Oportunidades</button>
+                                </td>
+                            </tr>
+                            <!-- More Clients -->
+                            <tr>
+                                <td class="border border-gray-200 p-2">Sofía Morales</td>
+                                <td class="border border-gray-200 p-2">$22,000</td>
+                                <td class="border border-gray-200 p-2">$9,000</td>
+                                <td class="border border-gray-200 p-2">+1.0% / +3% / +8%</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Ver Oportunidades</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">Pablo Sánchez</td>
+                                <td class="border border-gray-200 p-2">$30,000</td>
+                                <td class="border border-gray-200 p-2">$15,000</td>
+                                <td class="border border-gray-200 p-2">+1.5% / +6% / +18%</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Ver Oportunidades</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-200 p-2">Clara Méndez</td>
+                                <td class="border border-gray-200 p-2">$16,000</td>
+                                <td class="border border-gray-200 p-2">$5,500</td>
+                                <td class="border border-gray-200 p-2">+0.9% / +3.2% / +10%</td>
+                                <td class="border border-gray-200 p-2">
+                                    <button class="text-blue-600">Ver Oportunidades</button>
+                                </td>
+                            </tr>
+                            <!-- Continue adding more clients -->
+                        </tbody>
+                    </table>
+                </div>
+                
+
+                <!-- Reports Section -->
+                <div class="col-span-3 bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-bold mb-4">Reportes Personalizados</h2>
+                    <p>Generar reportes automatizados según objetivos de los clientes.</p>
+                    <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg mt-4">Generar Reporte</button>
+                </div>
+                <div class="col-span-3 bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-6">Bandeja de Entrada de Clientes</h2>
+
+                    <!-- Contenedor principal de la bandeja de entrada -->
+                    <div class="grid grid-cols-3 gap-6">
+                        <!-- Lista de Conversaciones -->
+                        <div class="col-span-1 bg-gray-100 p-4 rounded-lg shadow-inner overflow-y-auto h-96">
+                            <h3 class="text-lg font-semibold mb-4">Conversaciones Activas</h3>
+                            <ul class="space-y-4">
+                                <!-- Conversación 1 -->
+                                <li class="p-4 bg-white rounded-lg shadow hover:bg-indigo-50 cursor-pointer">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-bold">Carlos Pérez</span>
+                                        <span class="text-sm text-gray-500">Hace 5 min</span>
+                                    </div>
+                                    <p class="text-gray-700 text-sm">Necesito información sobre mis inversiones...</p>
+                                </li>
+                                <!-- Conversación 2 -->
+                                <li class="p-4 bg-white rounded-lg shadow hover:bg-indigo-50 cursor-pointer">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-bold">María López</span>
+                                        <span class="text-sm text-gray-500">Hace 10 min</span>
+                                    </div>
+                                    <p class="text-gray-700 text-sm">¿Podemos agendar una llamada esta semana?</p>
+                                </li>
+                                <!-- Conversación 3 -->
+                                <li class="p-4 bg-white rounded-lg shadow hover:bg-indigo-50 cursor-pointer">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-bold">Juan García</span>
+                                        <span class="text-sm text-gray-500">Hace 15 min</span>
+                                    </div>
+                                    <p class="text-gray-700 text-sm">Tengo dudas sobre los intereses generados.</p>
+                                </li>
+                            </ul>
+                        </div>
+                
+                        <!-- Detalles de la Conversación -->
+                        <div class="col-span-2 bg-white p-6 rounded-lg shadow-inner">
+                            <h3 class="text-lg font-semibold mb-4">Detalles de la Conversación</h3>
+                            
+                            <!-- Mensajes -->
+                            <div class="overflow-y-auto h-64 border rounded-lg p-4 bg-gray-50">
+                                <!-- Mensaje del Cliente -->
+                                <div class="mb-4">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-bold text-indigo-700">Carlos Pérez</span>
+                                        <span class="text-sm text-gray-500">Hoy, 14:35</span>
+                                    </div>
+                                    <p class="text-gray-700 mt-2">Hola, necesito más información sobre mis inversiones. ¿Cuánto rendimiento han generado este mes?</p>
+                                </div>
+                                <!-- Respuesta Generada por la IA -->
+                                <div class="mb-4">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-bold text-green-600">Respuesta IA</span>
+                                        <span class="text-sm text-gray-500">Hoy, 14:36</span>
+                                    </div>
+                                    <p class="text-gray-700 mt-2 bg-gray-200 p-2 rounded-lg">
+                                        Estimado Carlos, en este mes tus inversiones han generado un rendimiento del 5.2%. ¿Hay algo más en lo que pueda ayudarte?
+                                    </p>
+                                </div>
+                                <!-- Campo Editable -->
+                                <div class="mb-4">
+                                    <textarea class="w-full border border-gray-300 rounded-lg p-2" rows="3" placeholder="Editar respuesta antes de enviar..."></textarea>
+                                </div>
+                                <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg mt-2">Enviar Respuesta</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chatbot Section -->
+                <div class="col-span-3 bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-bold mb-4">Asistencia Chatbot</h2>
+                    <div>
+                        <p>¿Tienes dudas sobre cómo funciona la plataforma? Habla con nuestro chatbot.</p>
+                        <textarea class="w-full border border-gray-300 rounded-lg p-2 mt-2" placeholder="Escribe tu consulta aquí..."></textarea>
+                        <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg mt-4">Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
