@@ -1,0 +1,26 @@
+name: Rutina diaria por WhatsApp
+
+on:
+  schedule:
+    # 11:50 UTC = 08:50 en Argentina (UTC-3). GitHub suele demorar los cron
+    # unos minutos, así que el mensaje llega alrededor de las 9:00.
+    - cron: "50 11 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  enviar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Enviar rutina del día
+        env:
+          WHATSAPP_PROVIDER: ${{ vars.WHATSAPP_PROVIDER || 'callmebot' }}
+          WHATSAPP_PHONE: ${{ secrets.WHATSAPP_PHONE }}
+          CALLMEBOT_APIKEY: ${{ secrets.CALLMEBOT_APIKEY }}
+          TWILIO_SID: ${{ secrets.TWILIO_SID }}
+          TWILIO_TOKEN: ${{ secrets.TWILIO_TOKEN }}
+          TWILIO_FROM: ${{ secrets.TWILIO_FROM }}
+        run: python rutina/enviar_rutina.py
