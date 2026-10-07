@@ -1,17 +1,28 @@
-"""Envía por WhatsApp la rutina del día (gimnasio + running).
+"""Envía la rutina del día (running + gimnasio).
+
+Plan de 6 días con foco en correr más rápido y bajar de peso:
+  Lun  Gimnasio: tren superior A (+ trote suave opcional)
+  Mar  Running: pasadas (calidad)
+  Mié  Gimnasio: tren inferior (fuerza + potencia)
+  Jue  Running: rodaje suave / progresivo
+  Vie  Gimnasio: superior B + core (corto, sin piernas)
+  Sáb o Dom  Running: fondo largo (el otro día, descanso)
 
 Bloque de 8 semanas que se repite:
   - Semanas 1-3: carga progresiva
   - Semana 4: descarga
   - Semanas 5-7: carga progresiva
-  - Semana 8: descarga + test
+  - Semana 8: descarga + test de 5 km
+
+Ritmos de referencia (21 km a 4:47/km el año pasado, ajustados porque
+venís oxidado; se recalculan con el test de la semana 8).
 
 Variables de entorno:
   WHATSAPP_PROVIDER   "callmebot" (default) o "twilio"
   WHATSAPP_PHONE      tu número con código de país, ej: +5491122334455
   CALLMEBOT_APIKEY    (callmebot) api key que te da el bot
   TWILIO_SID, TWILIO_TOKEN, TWILIO_FROM   (twilio) credenciales y número emisor
-  RUTINA_INICIO       fecha de inicio del bloque, YYYY-MM-DD (default 2026-09-28)
+  RUTINA_INICIO       fecha de inicio del bloque, YYYY-MM-DD (default 2026-10-05)
   RUTINA_FECHA        fuerza una fecha (para probar), YYYY-MM-DD
   DRY_RUN=1           imprime el mensaje sin enviarlo
 """
@@ -25,149 +36,170 @@ from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
 TZ = ZoneInfo("America/Argentina/Buenos_Aires")
-INICIO = date.fromisoformat(os.environ.get("RUTINA_INICIO", "2026-09-28"))
+INICIO = date.fromisoformat(os.environ.get("RUTINA_INICIO", "2026-10-05"))
 
+RITMOS = (
+    "📏 *Ritmos de referencia*: suave 5:50-6:30/km · maratón ~5:10 · "
+    "umbral 4:55-5:05 · pasadas de 1 km 4:30-4:40 · 400 m en 1:45-1:50"
+)
 CALENTAMIENTO_GYM = (
     "🔥 *Entrada en calor (10')*: 5' bici/remo suave + movilidad de cadera, "
     "hombros y tobillos + 2 series livianas del primer básico."
 )
 CALENTAMIENTO_RUN = (
-    "🔥 *Entrada en calor*: 10' trote muy suave + técnica 2x20 m de cada uno: "
-    "skipping A, skipping B, taloneo, zancada saltada."
+    "🔥 *Entrada en calor*: 15' trote suave + técnica 2x20 m (skipping A, "
+    "skipping B, taloneo) + 4 aceleraciones de 60 m al 80-90%."
 )
+DESCARGA = (4, 8)
 
 # Series/reps de los básicos según la semana del bloque (1-8).
 FUERZA = {
     1: "4x6 @RPE7", 2: "4x5 @RPE8", 3: "5x4 @RPE8", 4: "3x5 @RPE6 (descarga)",
-    5: "4x5 @RPE8", 6: "5x4 @RPE8", 7: "5x3 @RPE8-9", 8: "3x3 @RPE6 (descarga)",
+    5: "4x5 @RPE8", 6: "5x4 @RPE8", 7: "5x3 @RPE8", 8: "3x3 @RPE6 (descarga)",
 }
-ACCESORIOS = {s: ("2 series" if s in (4, 8) else "3 series") for s in range(1, 9)}
-
-RODAJE = {
-    1: "30'", 2: "35'", 3: "40'", 4: "30' (descarga)",
-    5: "45'", 6: "50'", 7: "55'", 8: "40' (descarga)",
-}
+ACCESORIOS = {s: ("2 series" if s in DESCARGA else "3 series") for s in range(1, 9)}
 
 PASADAS = {
-    1: "6 x 200 m rápido (RPE 8) · pausa 2' caminando",
-    2: "8 x 200 m rápido (RPE 8) · pausa 2' caminando",
-    3: "6 x 300 m rápido (RPE 8) · pausa 2'30\" caminando",
-    4: "Descarga: 4 x 200 m (RPE 7) · pausa 2'",
-    5: "5 x 400 m (RPE 8) · pausa 2'30\" caminando",
-    6: "6 x 400 m (RPE 8) · pausa 2'30\" caminando",
-    7: "4 x 200 m + 4 x 300 m (RPE 8-9) · pausa 2'30\"",
-    8: "TEST: 60 m lanzado cronometrado x2 + 1 km a tope (anotá los tiempos)",
+    1: "8 x 400 m en 1:48-1:52 · pausa 1'30\" trotando",
+    2: "6 x 800 m a 4:35-4:40/km · pausa 2' trotando",
+    3: "5 x 1000 m a 4:35/km · pausa 2' trotando",
+    4: "Descarga: 6 x 400 m cómodos (1:52-1:55) · pausa 1'30\"",
+    5: "3 x 2000 m a umbral (4:55-5:00/km) · pausa 2' trotando",
+    6: "10 x 400 m en 1:45-1:48 · pausa 1'15\" trotando",
+    7: "5 x 1000 m a 4:30/km · pausa 1'45\" trotando",
+    8: "TEST: 5 km a tope (anotá el tiempo, con eso recalculamos los ritmos)",
 }
-SPRINTS = {
-    1: "4 x 30 m desde parado", 2: "5 x 30 m desde parado", 3: "4 x 40 m lanzado",
-    4: "3 x 30 m desde parado", 5: "5 x 40 m lanzado", 6: "6 x 40 m lanzado",
-    7: "4 x 50 m lanzado", 8: "(incluido en el test)",
+
+RODAJE = {
+    1: "40' suaves + 4 x 20\" progresivos",
+    2: "45' suaves + 6 x 20\" progresivos",
+    3: "45': 35' suaves + 10' a ritmo maratón (~5:10/km)",
+    4: "35' suaves (descarga)",
+    5: "50': 35' suaves + 15' a ritmo maratón (~5:10/km)",
+    6: "50' suaves + 6 x 20\" progresivos",
+    7: "55': 35' suaves + 20' a ritmo maratón (~5:10/km)",
+    8: "35' suaves + 4 x 20\" progresivos (descarga)",
 }
+
+FONDO = {
+    1: "60' continuos suaves", 2: "70' continuos suaves", 3: "80' continuos suaves",
+    4: "60' continuos suaves (descarga)", 5: "85' continuos suaves",
+    6: "90': 75' suaves + últimos 15' a ritmo maratón (~5:10/km)",
+    7: "100' continuos suaves", 8: "50' suaves (semana de test, sin exigirte)",
+}
+
+# Trote opcional después del gimnasio del lunes (desde semana 2, no en descarga).
+TROTE_EXTRA = {s: (None if s in (1, 4, 8) else "20-25' suaves") for s in range(1, 9)}
 
 
 def superior_a(s):
-    return [
-        "💪 *LUNES · TREN SUPERIOR A (fuerza + potencia)*",
+    lineas = [
+        "💪 *LUNES · GIMNASIO: TREN SUPERIOR A (fuerza + potencia)*",
         CALENTAMIENTO_GYM,
         "⚡ *Potencia* (explosivo, sin fatiga):",
         "• Lanzamiento de balón medicinal al pecho contra pared 4x5",
-        "• Flexiones pliométricas (con palmada o despegue) 3x5",
+        "• Flexiones pliométricas 3x5",
         "🏋️ *Fuerza*:",
         f"• Press banca {FUERZA[s]}",
         f"• Remo con barra {FUERZA[s]}",
         "• Press militar de pie 3x6-8",
-        "• Dominadas (lastradas si pasás 8) 3x5-8",
+        "• Dominadas 3x5-8",
         f"🔧 *Accesorios* ({ACCESORIOS[s]}):",
         "• Face pull x12-15 · Curl con barra x10-12 · Extensión tríceps polea x10-12",
     ]
+    if TROTE_EXTRA[s]:
+        lineas.append(
+            f"🏃 *Opcional (suma para bajar de peso)*: {TROTE_EXTRA[s]} en cinta o "
+            "afuera después de las pesas, Zona 2."
+        )
+    return lineas
 
 
-def inferior_a(s):
+def pasadas(s):
     return [
-        "🦵 *MARTES · TREN INFERIOR A (fuerza + velocidad)*",
+        "⚡ *MARTES · RUNNING: PASADAS (velocidad)*",
+        CALENTAMIENTO_RUN,
+        f"🔁 *Bloque principal*: {PASADAS[s]}",
+        "🧊 *Vuelta a la calma*: 10' trote muy suave + elongación.",
+        RITMOS,
+        "💡 Si la última repetición sale más lenta que la primera, arrancaste muy rápido.",
+    ]
+
+
+def inferior(s):
+    return [
+        "🦵 *MIÉRCOLES · GIMNASIO: TREN INFERIOR (fuerza + potencia)*",
+        "⚠️ Mañana corrés: dejá 2 reps en reserva, nada al fallo.",
         CALENTAMIENTO_GYM,
         "⚡ *Potencia*:",
         "• Salto al cajón 4x3 (bajar caminando)",
-        "• Salto horizontal (broad jump) 3x3",
+        "• Saltos alternados (bounds) 3x4 c/pierna",
         "🏋️ *Fuerza*:",
         f"• Sentadilla trasera {FUERZA[s]}",
         "• Peso muerto rumano 3x6-8",
         "• Sentadilla búlgara 3x8 c/pierna",
+        "• Curl nórdico 3x4-6 (protege isquios)",
         f"🔧 *Accesorios* ({ACCESORIOS[s]}):",
-        "• Gemelos de pie x12-15 · Elevación de tibial x15 · Pallof press x10 c/lado",
+        "• Gemelos a una pierna x12-15 · Elevación de tibial x15 · Copenhagen plank 20\" c/lado",
     ]
 
 
 def rodaje(s):
-    lineas = [
-        "🏃 *MIÉRCOLES · RODAJE SUAVE (base aeróbica)*",
-        f"⏱️ *Duración*: {RODAJE[s]} continuos",
-        "🎯 *Ritmo*: Zona 2 — tenés que poder hablar en frases completas "
-        "(RPE 3-4, ~65-75% FC máx). Si dudás, andá más lento.",
+    return [
+        "🏃 *JUEVES · RUNNING: RODAJE (base aeróbica)*",
+        f"⏱️ *Sesión*: {RODAJE[s]}",
+        "🎯 *Suave* = Zona 2, podés hablar en frases completas (5:50-6:30/km). "
+        "Si dudás, más lento.",
+        "🧘 Después: 5' de elongación de gemelos, isquios y flexores de cadera.",
     ]
-    if s >= 3 and s not in (4, 8):
-        lineas.append("➕ Al final: 4 x 20\" progresivos (strides) con 1' caminando.")
-    lineas.append("🧘 Después: 5' de elongación de gemelos, isquios y flexores de cadera.")
-    return lineas
 
 
 def superior_b(s):
     return [
-        "💪 *JUEVES · TREN SUPERIOR B (hipertrofia + potencia)*",
+        "💪 *VIERNES · GIMNASIO: SUPERIOR B + CORE (corto, sin piernas)*",
+        "⚠️ El fin de semana va el fondo largo: piernas descansadas.",
         CALENTAMIENTO_GYM,
-        "⚡ *Potencia*:",
-        "• Push press 4x3 (explosivo)",
-        "• Lanzamiento rotacional de balón medicinal 3x5 c/lado",
+        "⚡ *Potencia*: Lanzamiento rotacional de balón medicinal 3x5 c/lado",
         "🏋️ *Fuerza / hipertrofia*:",
         "• Press inclinado con mancuernas 4x6-8",
         "• Dominadas o jalón al pecho 4x8",
         "• Fondos en paralelas 3x8-10",
         "• Remo con mancuerna a una mano 3x8-10",
-        f"🔧 *Accesorios* ({ACCESORIOS[s]}):",
-        "• Elevaciones laterales x12-15 · Curl martillo x10-12 · Face pull x15",
+        f"🧱 *Core* ({ACCESORIOS[s]}):",
+        "• Plancha 40\" · Dead bug x10 c/lado · Pallof press x10 c/lado",
     ]
 
 
-def inferior_b(s):
+def _fondo(s):
     return [
-        "🦵 *VIERNES · TREN INFERIOR B (potencia, volumen moderado)*",
-        "⚠️ Mañana hay pasadas: nada al fallo, dejá 2-3 reps en reserva.",
-        CALENTAMIENTO_GYM,
-        "⚡ *Potencia*:",
-        "• Hang power clean 5x3 (si no dominás la técnica: swing con kettlebell 5x8)",
-        "• Bounds / saltos alternados 3x4 c/pierna",
-        "🏋️ *Fuerza*:",
-        f"• Peso muerto convencional {FUERZA[s]}",
-        "• Hip thrust 3x8",
-        "• Curl nórdico 3x4-6 (clave para proteger isquios en los sprints)",
-        f"🔧 *Accesorios* ({ACCESORIOS[s]}):",
-        "• Step-up al cajón x8 c/pierna · Copenhagen plank 20\" c/lado",
+        f"⏱️ *Sesión*: {FONDO[s]}",
+        "🎯 *Suave* = 5:50-6:30/km o más lento si hay desnivel.",
+        "⛰️ Si podés, hacelo en trail o con desnivel: mismo tiempo, ritmo por sensación.",
+        "💧 Más de 75': llevá agua y un gel o algo de azúcar a partir de los 45'.",
+        "🎯 La idea es terminar con la sensación de que podrías haber seguido.",
     ]
 
 
-def pasadas(s):
+def sabado(s):
     return [
-        "⚡ *SÁBADO · PASADAS (velocidad)*",
-        CALENTAMIENTO_RUN,
-        "➕ 3 aceleraciones progresivas de 60 m (al 70-80-90%).",
-        f"🚀 *Velocidad máxima*: {SPRINTS[s]} al 95-100% · pausa COMPLETA 2-3' "
-        "(la calidad es todo, si te sale más lento cortá).",
-        f"🔁 *Pasadas*: {PASADAS[s]}",
-        "🧊 *Vuelta a la calma*: 10' trote muy suave + elongación.",
-    ]
+        "🏞️ *SÁBADO · FONDO LARGO (hoy o mañana)*",
+        "Elegí el día: el fondo hoy y mañana descanso, o al revés.",
+    ] + _fondo(s)
 
 
-def descanso(s):
+def domingo(s):
     return [
-        "😴 *DOMINGO · DESCANSO*",
-        "Recuperación activa opcional: 20-30' caminata, 10' de movilidad, "
-        "dormí bien y comé proteína suficiente.",
-        "📋 Revisá cómo te sentiste en la semana: si llegaste muy cansado, "
-        "bajá un poco el volumen la próxima.",
+        "🏞️ *DOMINGO · FONDO LARGO o DESCANSO*",
+        "👉 Si ayer no hiciste el fondo, hoy toca:",
+    ] + _fondo(s) + [
+        "",
+        "😴 Si ya lo hiciste: descanso total o 30' de caminata + movilidad.",
+        "🍽️ Para bajar de peso: déficit moderado (300-500 kcal/día), proteína "
+        "1,6-2 g por kg de peso y no recortes carbohidratos los días de pasadas y fondo.",
     ]
 
 
-DIAS = [superior_a, inferior_a, rodaje, superior_b, inferior_b, pasadas, descanso]
+DIAS = [superior_a, pasadas, inferior, rodaje, superior_b, sabado, domingo]
 
 
 def mensaje(hoy: date) -> str:
